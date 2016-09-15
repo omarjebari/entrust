@@ -23,6 +23,16 @@ trait EntrustPermissionTrait
     }
 
     /**
+     * Many-to-Many relations with the user model.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     */
+    public function users()
+    {
+        return $this->belongsToMany(Config::get('entrust.permission'), Config::get('entrust.permission_user_table'));
+    }
+
+    /**
      * Boot the permission model
      * Attach event listener to remove the many-to-many records when trying to delete
      * Will NOT delete any records if the permission model uses soft deletes.
@@ -36,6 +46,7 @@ trait EntrustPermissionTrait
         static::deleting(function($permission) {
             if (!method_exists(Config::get('entrust.permission'), 'bootSoftDeletingTrait')) {
                 $permission->roles()->sync([]);
+                $permission->users()->sync([]);
             }
 
             return true;
